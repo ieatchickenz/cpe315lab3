@@ -38,32 +38,6 @@ public class lab2 {
         lineObjectTable.put("jr", new instructionObject("jr", "RJ", "001000", "000000"));
         lineObjectTable.put("jal", new instructionObject("jal", "J", "", "000011"));
 
-        /*Hashtable<String, String> funcTable = new Hashtable<String, String>();
-        funcTable.put("and","100100");
-        funcTable.put("or","100101");
-        funcTable.put("add","100000");
-        funcTable.put("sll","000000");
-        funcTable.put("sub","100010");
-        funcTable.put("slt","101010");
-        funcTable.put("jr","001000");
-
-        Hashtable<String, String> instructionTable = new Hashtable<String, String>();
-        instructionTable.put("and","000000");
-        instructionTable.put("or","000000");
-        instructionTable.put("add","000000");
-        instructionTable.put("addi","001000");
-        instructionTable.put("sll","000000");
-        instructionTable.put("sub","000000");
-        instructionTable.put("slt","000000");
-        instructionTable.put("beq","000100");
-        instructionTable.put("bne","000101");
-        instructionTable.put("lw","100011");
-        instructionTable.put("sw","101011");
-        instructionTable.put("j","000010");
-        instructionTable.put("jr","000000");
-        instructionTable.put("jal","000011");
-        */
-
         Hashtable<String, String> registerTable = new Hashtable<String, String>();
         registerTable.put("zero","00000");
         registerTable.put("0","00000");
