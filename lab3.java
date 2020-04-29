@@ -20,6 +20,12 @@ public class lab2 {
         //empty initially: fill in registers / immediate / address / shamt
 
         //and, or, add, addi, sll, sub, slt, beq, bne, lw, sw, j, jr, and jal
+	
+	    //Need to make MIPS register (int array), data memory(int array 8192), PC
+	    List<Integer> regList = new ArrayList<Integer>(32);
+	    List<Integer> dataMem = new ArrayList<Integer>(8192);
+	    int pc = 0;
+	
         List<List<String>> lineList = new ArrayList<List<String>>();
 
         Hashtable<String, instructionObject> lineObjectTable = new Hashtable<String, instructionObject>();
@@ -254,6 +260,30 @@ public class lab2 {
 
     }
 
+    //This is after the formatting has been done for the .asm
+    if(args.length()<2 && args.length() != 0){
+	    //Do prompt
+    }
+    else if(args.length(0 == 2){
+        //script read
+        List<List<String>> scriptList = new ArrayList<List<String>>();
+
+        File scriptFile = new File(args[1]);
+
+	    try(Stream<String> commands = Files.lines(scriptFile.toPath())){
+            List<String> commandList = instructions.map(String::trim)
+                                    .filter(line -> line.length() > 0)
+                                    .collect(Collectors.toList());
+        }
+        catch(IOException exs){
+
+        }
+
+    }
+    else{
+        System.out.println("Argument mismatch");
+        System.out.println("Usage: lab3 input.asm [script]");
+    }
 }
 
 class instructionObject {
