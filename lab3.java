@@ -13,6 +13,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class lab3 {
+	static int[] regList;
+	static int[] dataMem;
+	static int pc;
+
     public static void main(String[] args) 
     {
 
@@ -23,13 +27,13 @@ public class lab3 {
         //and, or, add, addi, sll, sub, slt, beq, bne, lw, sw, j, jr, and jal
 	
 	    //Need to make MIPS register (int array), data memory(int array 8192), PC
-        int[] regList = new int[32];
+        regList = new int[32];
         Arrays.fill(regList, 0);
 
-        int[] dataMem = new int[8192];
+        dataMem = new int[8192];
         Arrays.fill(dataMem, 0);
         
-        int pc = 0;
+        pc = 0;
         
         //This is an array of instructions, index is pc
         List<instructionObject> program = new ArrayList<instructionObject>();
@@ -162,74 +166,54 @@ public class lab3 {
         for(int i = 0; i < lineList.size(); i++) {
             address = i;
             temp = lineObjectTable.getOrDefault(lineList.get(i).get(0), invalid);
+            temp = new instructionObject(	temp.name, 
+									            	temp.format, 
+									            	temp.functioncode, 
+									            	temp.opcode);
             int tempInt;
             switch (temp.format) {
                 case "R":
-                    //System.out.println("Register Format");
-                    //insert arguments to the operations
-                    /*System.out.print(temp.opcode + " ");
-                    System.out.print(registerTable.getOrDefault(lineList.get(i).get(2), "Invalid") + " ");
-                    System.out.print(registerTable.getOrDefault(lineList.get(i).get(3), "Invalid") + " ");
-                    System.out.print(registerTable.getOrDefault(lineList.get(i).get(1), "Invalid") + " ");
-                    //System.out.print(temp.shamt.equals("") ? "00000" + " ":temp.shamt + " ");
-                    System.out.print("00000" + " ");
-                    System.out.println(temp.functioncode);*/
                     temp.registerS = Integer.parseInt(registerTable.get(lineList.get(i).get(2)), 2);
                     temp.registerT = Integer.parseInt(registerTable.get(lineList.get(i).get(3)), 2);
                     temp.registerD = Integer.parseInt(registerTable.get(lineList.get(i).get(1)), 2);
                     break;
 
                 case "RS":
-                    //System.out.println("Register Shift Format");
-                    /*System.out.print(temp.opcode + " ");
-                    System.out.print("00000" + " ");
-                    System.out.print(registerTable.getOrDefault(lineList.get(i).get(2), "Invalid") + " ");
-                    System.out.print(registerTable.getOrDefault(lineList.get(i).get(1), "Invalid") + " ");
-                    //System.out.print(temp.shamt.equals("") ? "00000" + " ":temp.shamt + " ");
-                    tempInt = Integer.parseInt(lineList.get(i).get(3));
-                    System.out.print((String.format("%5s", Integer.toBinaryString(tempInt)).replace(" ", "0")) + " ");
-                    System.out.println(temp.functioncode);*/
+                    
                     temp.registerT = Integer.parseInt(registerTable.get(lineList.get(i).get(2)), 2);
                     temp.registerD = Integer.parseInt(registerTable.get(lineList.get(i).get(1)), 2);
                     temp.shamt = Integer.parseInt(lineList.get(i).get(3));
                     break;
 
                 case "I":
-                    //may have labels
-                    //System.out.println("Immediate Format");
-                    //System.out.print(temp.opcode + " ");
-                    //System.out.print(registerTable.getOrDefault(lineList.get(i).get(1), "Invalid") + " ");
-                    //System.out.print(registerTable.getOrDefault(lineList.get(i).get(2), "Invalid") + " ");
-                    //System.out.print(temp.shamt.equals("") ? "00000" + " ":temp.shamt + " ");
-                    //need to check if label
+                    
                     temp.registerS = Integer.parseInt(registerTable.get(lineList.get(i).get(1)), 2);
                     temp.registerT = Integer.parseInt(registerTable.get(lineList.get(i).get(2)), 2);
                     
                     if((lineList.get(i).get(3).matches("-?([0-9]+)?[0-9]+")) || (lineList.get(i).get(3).matches("-"))){
                         tempInt = Integer.parseInt(lineList.get(i).get(3));
+                        System.out.println(lineList.get(i).get(3));
+                        System.out.println("yes");
                     }
                     else{
                         tempInt = labels.get(lineList.get(i).get(3))-address-1; 
+                        System.out.println("no");
+
                     }
                     temp.immediate = tempInt;
 
-                    //immed = String.format("%16s", Integer.toBinaryString(tempInt)).replace(" ", "0" );
-                    //System.out.println(immed.substring(immed.length() -16) + " ");
+                    
                     break;
 
                 case "IS":
-                    //System.out.println("Immediate Load/Store Format");
-                    //System.out.print(temp.opcode + " ");
-                    //System.out.print(registerTable.getOrDefault(lineList.get(i).get(3), "Invalid") + " ");
-                    //System.out.print(registerTable.getOrDefault(lineList.get(i).get(1), "Invalid") + " ");
+                    
                     temp.registerS = Integer.parseInt(registerTable.get(lineList.get(i).get(3)), 2);
                     temp.registerT = Integer.parseInt(registerTable.get(lineList.get(i).get(1)), 2);
                     //System.out.print(temp.shamt.equals("") ? "00000" + " ":temp.shamt + " ");
                     //need to check if label
                     tempInt = Integer.parseInt(lineList.get(i).get(2));
                     temp.immediate = tempInt;
-                    //immed = String.format("%16s", Integer.toBinaryString(tempInt)).replace(" ", "0" );
-                    //System.out.println(immed.substring(immed.length()-16) + " ");
+                    
                     break;
 
                 case "J":
@@ -248,12 +232,9 @@ public class lab3 {
                     break;
 
                 case "RJ":
-                    //System.out.println("Jump Register Format");
-                    //System.out.print(temp.opcode);
-                    //System.out.print(registerTable.getOrDefault(lineList.get(i).get(1), "Invalid") + " ");
+                    
                     temp.registerS = Integer.parseInt(registerTable.get(lineList.get(i).get(1)), 2);
-                    //System.out.print("000000000000000 ");
-                    //System.out.println(temp.functioncode);
+                    
                     break;
 
                 default:
@@ -322,13 +303,29 @@ public class lab3 {
                         break;
 
                     case "s":
-                        step();
-                        System.out.println();
+                    		//determine fate of invalid PC address
+                    		int tempint = 1;
+                    		if(commandArg.length < 2)
+                    		{
+                    			tempint = 1;
+                    		}
+                    		else
+                    		{
+                    			tempint = Integer.parseInt(commandArg[1]);
+                    		}
+                    		for(int z = 0; z < tempint; z++)
+                    		{
+                    			step(program.get(pc));
+                        	pc += 1;
+                    		}
+                        System.out.println(tempint + " instruction(s) executed");
                         break;
 
                     case "r":
-                        run();
-                        System.out.println();
+                    		while(pc < program.size()) {
+                    			step(program.get(pc));
+                        	pc += 1;
+                    		}
                         break;
 
                     case "m":
@@ -404,12 +401,82 @@ public class lab3 {
         System.out.println("$t9 = " + regList[25] + "\t\t$sp = " + regList[30] + "\t\t$ra = " + regList[31]);
     }
 
-    public static void step(){
-        
+    public static void step(instructionObject instruction){
+      //a case statement
+    	//return a string to be printed in 's' case
+    	//ignore if we run
+    	//and, or, add, addi, sll, sub, slt, beq, bne, lw, sw, j, jr, and jal
+    	System.out.println("here");
+    	//return;
+    	switch(instruction.name){
+                    case "add":
+                        regList[instruction.registerD] = regList[instruction.registerS] + regList[instruction.registerT];
+                        return;
+
+                    case "addi":
+                    		System.out.println(regList[instruction.registerT]);
+                    		System.out.println(regList[instruction.registerS]);
+                    		System.out.println(instruction.immediate);
+                        regList[instruction.registerT] = regList[instruction.registerS] + instruction.immediate;
+                    		return;
+
+                    	case "and":
+                        regList[instruction.registerD] = regList[instruction.registerS] & regList[instruction.registerT];
+                    		return;
+
+                    	case "or":
+                        regList[instruction.registerD] = regList[instruction.registerS] | regList[instruction.registerT];
+                    		return;
+
+                    	case "sll":
+                        regList[instruction.registerD] = regList[instruction.registerT] << instruction.shamt;
+                    		return;
+
+                    	case "sub":
+                        regList[instruction.registerD] = regList[instruction.registerS] - regList[instruction.registerT];
+                    		return;
+
+                    	case "slt":
+                        regList[instruction.registerD] = (regList[instruction.registerS] < regList[instruction.registerT]) ? 1:0;
+                    		return;
+
+                    	case "beq":
+                        pc = (regList[instruction.registerS] == regList[instruction.registerT]) ? pc + instruction.immediate : pc;
+                    		return;
+
+                    	case "bne":
+                        pc = (regList[instruction.registerS] != regList[instruction.registerT]) ? pc + instruction.immediate : pc;
+                    		return;
+
+                    	case "lw":
+                        regList[instruction.registerT] = dataMem[instruction.registerS + instruction.immediate];
+                    		return;
+
+                    	case "sw":
+                        dataMem[regList[instruction.registerS] + instruction.immediate] = regList[instruction.registerT];
+                    		return;
+
+                    	case "j":
+                    		pc = instruction.immediate;
+                    		return;
+
+                    	case "jr":
+                    		pc = instruction.registerS;
+                    		return;
+
+                    	case "jal":
+                    		regList[31] = pc + 1;
+                    		pc = instruction.immediate;
+                    		return;
+
+                    	default:
+                    		return;
+         }
     }
 
     public static void run(){
-
+    		//step a bunch
+    		//end at end of instrs
     }
 
     public static void memDisp(int[] dataMem, int start, int end){
@@ -454,7 +521,7 @@ class instructionObject {
     @Override
     public String toString()
     {
-        return "-----" + name + " Reg:" + registerS + "-----";
+        return "-----" + name + " Reg:" + immediate + "-----";
     }
     
 }
