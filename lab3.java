@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.AbstractList;
 import java.util.Arrays;
 import java.util.ArrayList;
+import java.util.Scanner;
 import java.lang.String;
 import java.util.stream.Collectors;
 import java.io.File;
@@ -11,7 +12,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-public class lab2 {
+public class lab3 {
     public static void main(String[] args) 
     {
 
@@ -22,10 +23,17 @@ public class lab2 {
         //and, or, add, addi, sll, sub, slt, beq, bne, lw, sw, j, jr, and jal
 	
 	    //Need to make MIPS register (int array), data memory(int array 8192), PC
-	    List<Integer> regList = new ArrayList<Integer>(32);
-	    List<Integer> dataMem = new ArrayList<Integer>(8192);
-	    int pc = 0;
-	
+        int[] regList = new int[32];
+        Arrays.fill(regList, 0);
+
+        int[] dataMem = new int[8192];
+        Arrays.fill(dataMem, 0);
+        
+        int pc = 0;
+        
+        //This is an array of instructions, index is pc
+        List<instructionObject> program = new ArrayList<instructionObject>();
+
         List<List<String>> lineList = new ArrayList<List<String>>();
 
         Hashtable<String, instructionObject> lineObjectTable = new Hashtable<String, instructionObject>();
@@ -83,6 +91,11 @@ public class lab2 {
         //instructionObject i = new instructionObject("1", "1", "1", "1");
         //System.out.println(i.name);
         //System.out.println(i.register1);
+        if(args.length == 0){
+            System.out.println("Argument mismatch");
+            System.out.println("Usage: lab3 input.asm [script]");
+            return;
+        }
 
 	    File asmFile = new File(args[0]);
         int address = 0;
@@ -150,91 +163,107 @@ public class lab2 {
             address = i;
             temp = lineObjectTable.getOrDefault(lineList.get(i).get(0), invalid);
             int tempInt;
-            String immed;
             switch (temp.format) {
                 case "R":
                     //System.out.println("Register Format");
                     //insert arguments to the operations
-                    System.out.print(temp.opcode + " ");
+                    /*System.out.print(temp.opcode + " ");
                     System.out.print(registerTable.getOrDefault(lineList.get(i).get(2), "Invalid") + " ");
                     System.out.print(registerTable.getOrDefault(lineList.get(i).get(3), "Invalid") + " ");
                     System.out.print(registerTable.getOrDefault(lineList.get(i).get(1), "Invalid") + " ");
                     //System.out.print(temp.shamt.equals("") ? "00000" + " ":temp.shamt + " ");
                     System.out.print("00000" + " ");
-                    System.out.println(temp.functioncode);
+                    System.out.println(temp.functioncode);*/
+                    temp.registerS = Integer.parseInt(registerTable.get(lineList.get(i).get(2)), 2);
+                    temp.registerT = Integer.parseInt(registerTable.get(lineList.get(i).get(3)), 2);
+                    temp.registerD = Integer.parseInt(registerTable.get(lineList.get(i).get(1)), 2);
                     break;
 
                 case "RS":
                     //System.out.println("Register Shift Format");
-                    System.out.print(temp.opcode + " ");
+                    /*System.out.print(temp.opcode + " ");
                     System.out.print("00000" + " ");
                     System.out.print(registerTable.getOrDefault(lineList.get(i).get(2), "Invalid") + " ");
                     System.out.print(registerTable.getOrDefault(lineList.get(i).get(1), "Invalid") + " ");
                     //System.out.print(temp.shamt.equals("") ? "00000" + " ":temp.shamt + " ");
                     tempInt = Integer.parseInt(lineList.get(i).get(3));
                     System.out.print((String.format("%5s", Integer.toBinaryString(tempInt)).replace(" ", "0")) + " ");
-                    System.out.println(temp.functioncode);
+                    System.out.println(temp.functioncode);*/
+                    temp.registerT = Integer.parseInt(registerTable.get(lineList.get(i).get(2)), 2);
+                    temp.registerD = Integer.parseInt(registerTable.get(lineList.get(i).get(1)), 2);
+                    temp.shamt = Integer.parseInt(lineList.get(i).get(3));
                     break;
 
                 case "I":
                     //may have labels
                     //System.out.println("Immediate Format");
-                    System.out.print(temp.opcode + " ");
-                    System.out.print(registerTable.getOrDefault(lineList.get(i).get(1), "Invalid") + " ");
-                    System.out.print(registerTable.getOrDefault(lineList.get(i).get(2), "Invalid") + " ");
+                    //System.out.print(temp.opcode + " ");
+                    //System.out.print(registerTable.getOrDefault(lineList.get(i).get(1), "Invalid") + " ");
+                    //System.out.print(registerTable.getOrDefault(lineList.get(i).get(2), "Invalid") + " ");
                     //System.out.print(temp.shamt.equals("") ? "00000" + " ":temp.shamt + " ");
                     //need to check if label
-                
+                    temp.registerS = Integer.parseInt(registerTable.get(lineList.get(i).get(1)), 2);
+                    temp.registerT = Integer.parseInt(registerTable.get(lineList.get(i).get(2)), 2);
+                    
                     if((lineList.get(i).get(3).matches("-?([0-9]+)?[0-9]+")) || (lineList.get(i).get(3).matches("-"))){
                         tempInt = Integer.parseInt(lineList.get(i).get(3));
                     }
                     else{
                         tempInt = labels.get(lineList.get(i).get(3))-address-1; 
                     }
-                    immed = String.format("%16s", Integer.toBinaryString(tempInt)).replace(" ", "0" );
-                    System.out.println(immed.substring(immed.length() -16) + " ");
+                    temp.immediate = tempInt;
+
+                    //immed = String.format("%16s", Integer.toBinaryString(tempInt)).replace(" ", "0" );
+                    //System.out.println(immed.substring(immed.length() -16) + " ");
                     break;
 
                 case "IS":
                     //System.out.println("Immediate Load/Store Format");
-                    System.out.print(temp.opcode + " ");
-                    System.out.print(registerTable.getOrDefault(lineList.get(i).get(3), "Invalid") + " ");
-                    System.out.print(registerTable.getOrDefault(lineList.get(i).get(1), "Invalid") + " ");
+                    //System.out.print(temp.opcode + " ");
+                    //System.out.print(registerTable.getOrDefault(lineList.get(i).get(3), "Invalid") + " ");
+                    //System.out.print(registerTable.getOrDefault(lineList.get(i).get(1), "Invalid") + " ");
+                    temp.registerS = Integer.parseInt(registerTable.get(lineList.get(i).get(3)), 2);
+                    temp.registerT = Integer.parseInt(registerTable.get(lineList.get(i).get(1)), 2);
                     //System.out.print(temp.shamt.equals("") ? "00000" + " ":temp.shamt + " ");
                     //need to check if label
                     tempInt = Integer.parseInt(lineList.get(i).get(2));
-                    immed = String.format("%16s", Integer.toBinaryString(tempInt)).replace(" ", "0" );
-                    System.out.println(immed.substring(immed.length()-16) + " ");
+                    temp.immediate = tempInt;
+                    //immed = String.format("%16s", Integer.toBinaryString(tempInt)).replace(" ", "0" );
+                    //System.out.println(immed.substring(immed.length()-16) + " ");
                     break;
 
                 case "J":
                     //has labels
                     //System.out.println("Jump Format");
-                    System.out.print(temp.opcode + " ");
+                    //System.out.print(temp.opcode + " ");
                     if(lineList.get(i).get(1).matches("-?([0-9]+)?[0-9]+")){
                         tempInt = Integer.parseInt(lineList.get(i).get(1));
                     }
                     else{
                         tempInt = labels.get(lineList.get(i).get(1));
                     }
-                    immed = String.format("%26s", Integer.toBinaryString(tempInt)).replace(" ", "0" );
-                    System.out.println(immed.substring(immed.length() -26) + " ");
+                    temp.immediate = tempInt;
+                    //immed = String.format("%26s", Integer.toBinaryString(tempInt)).replace(" ", "0" );
+                    //System.out.println(immed.substring(immed.length() -26) + " ");
                     break;
 
                 case "RJ":
                     //System.out.println("Jump Register Format");
-                    System.out.print(temp.opcode);
-                    System.out.print(registerTable.getOrDefault(lineList.get(i).get(1), "Invalid") + " ");
-                    System.out.print("000000000000000 ");
-                    System.out.println(temp.functioncode);
+                    //System.out.print(temp.opcode);
+                    //System.out.print(registerTable.getOrDefault(lineList.get(i).get(1), "Invalid") + " ");
+                    temp.registerS = Integer.parseInt(registerTable.get(lineList.get(i).get(1)), 2);
+                    //System.out.print("000000000000000 ");
+                    //System.out.println(temp.functioncode);
                     break;
 
                 default:
                     System.out.print("invalid instruction: ");
                     System.out.println(lineList.get(i).get(0) + "\n");
                     return;
+               }
+               program.add(temp);
             }
-        }
+            System.out.println(program.toString());
 
 
         //first loop is for labels:
@@ -258,45 +287,148 @@ public class lab2 {
 
         }
 
-    }
 
-    //This is after the formatting has been done for the .asm
-    if(args.length()<2 && args.length() != 0){
-	    //Do prompt
-    }
-    else if(args.length(0 == 2){
-        //script read
-        List<List<String>> scriptList = new ArrayList<List<String>>();
+        //This is after the formatting has been done for the .asm
+        Scanner in = new Scanner(System.in);
+        String command;
 
-        File scriptFile = new File(args[1]);
+        if(args.length<2 && args.length!=0){
+            //Do prompt
+            while(true){ 
+                System.out.print("mips> ");
+                command = in.nextLine();
+                String[] commandArg = command.split(" ");
+                //System.out.println(Arrays.toString(commandArg));
+                switch(commandArg[0]){
+                    case "q":
+                        in.close();
+                        return;
+                    case "quit":
+                        in.close();
+                        return;
 
-	    try(Stream<String> commands = Files.lines(scriptFile.toPath())){
-            List<String> commandList = instructions.map(String::trim)
-                                    .filter(line -> line.length() > 0)
-                                    .collect(Collectors.toList());
+                    case "h":
+                        help();
+                        System.out.println();
+                        break;
+                    case "help":
+                        help();
+                        System.out.println();
+                        break;
+
+                    case "d":
+                        regDump(regList, pc);
+                        System.out.println();
+                        break;
+
+                    case "s":
+                        step();
+                        System.out.println();
+                        break;
+
+                    case "r":
+                        run();
+                        System.out.println();
+                        break;
+
+                    case "m":
+                        if(commandArg.length > 3 || commandArg.length < 3){
+                            System.out.println("Incorrect Formatting: type 'h' for help");
+                        }
+                        else{
+                            memDisp(dataMem, Integer.parseInt(commandArg[1]), Integer.parseInt(commandArg[2]));
+                        }
+                        System.out.println();
+                        break;
+
+                    case "c":
+                        Arrays.fill(regList, 0);
+                        Arrays.fill(dataMem, 0);
+                        pc = 0;
+                        System.out.println("\tSimulator reset");
+                        System.out.println();
+                        break;
+
+                    default:
+                        System.out.println("Invalid command.");
+                        System.out.println();
+                        break;
+                }
+
+            }
+
         }
-        catch(IOException exs){
+        else if(args.length == 2){
+            //script read start here
+            List<List<String>> scriptList = new ArrayList<List<String>>();
+
+            File scriptFile = new File(args[1]);
+
+            try(Stream<String> commands = Files.lines(scriptFile.toPath())){
+                List<String> commandList = commands.map(String::trim)
+                                        .filter(line -> line.length() > 0)
+                                        .collect(Collectors.toList());
+            }
+            catch(IOException exs){
+
+            }
 
         }
+        else{
+            System.out.println("Argument mismatch");
+            System.out.println("Usage: lab3 input.asm [script]");
+        }
+    }
+
+    public static void help(){
+        System.out.println();
+        System.out.println("\th = show help");
+        System.out.println("\td = dump register state");
+        System.out.println("\ts = single step through the program (i.e. execute 1 instruction and stop)");
+        System.out.println("\ts num = step through num instructions of the program");
+        System.out.println("\tr = run until the program ends");
+        System.out.println("\tm num1 num2 = display data memory from location num1 to num2");
+        System.out.println("\tc = clear all registers, memory, and the program counter to 0");
+        System.out.println("\tq = exit the program");
+    }
+
+    public static void regDump(int[] regList, int progCount){
+        System.out.println();
+        System.out.println("pc = " + progCount);
+        System.out.println("$0 = " + regList[0] + "\t\t$v0 = " + regList[2] + "\t\t$v1 = " + regList[3] + "\t\t$a0 = " + regList[4]);
+        System.out.println("$a1 = " + regList[5] + "\t\t$a2 = " + regList[6] + "\t\t$a3 = " + regList[7] + "\t\t$t0 = " + regList[8]);
+        System.out.println("$t1 = " + regList[9] + "\t\t$t2 = " + regList[10] + "\t\t$t3 = " + regList[11] + "\t\t$t4 = " + regList[12]);
+        System.out.println("$t5 = " + regList[13] + "\t\t$t6 = " + regList[14] + "\t\t$t7 = " + regList[15] + "\t\t$s0 = " + regList[16]);
+        System.out.println("$s1 = " + regList[17] + "\t\t$s2 = " + regList[18] + "\t\t$s3 = " + regList[19] + "\t\t$s4 = " + regList[20]);
+        System.out.println("$s5 = " + regList[21] + "\t\t$s6 = " + regList[22] + "\t\t$s7 = " + regList[23] + "\t\t$t8 = " + regList[24]);
+        System.out.println("$t9 = " + regList[25] + "\t\t$sp = " + regList[30] + "\t\t$ra = " + regList[31]);
+    }
+
+    public static void step(){
+        
+    }
+
+    public static void run(){
 
     }
-    else{
-        System.out.println("Argument mismatch");
-        System.out.println("Usage: lab3 input.asm [script]");
+
+    public static void memDisp(int[] dataMem, int start, int end){
+        System.out.println(Arrays.toString(Arrays.copyOfRange(dataMem, start, end+1)));
     }
+
 }
+
 
 class instructionObject {
     public String name;
     public String format;
     public String functioncode;
     public String opcode;
-    public String register1;
-    public String register2;
-    public String register3;
-    public String immediate;
-    public String shamt;
-    public String address;
+    public Integer registerS;
+    public Integer registerT;
+    public Integer registerD;
+    public Integer immediate;
+    public Integer shamt;
 
     instructionObject() 
     {
@@ -312,15 +444,19 @@ class instructionObject {
         this.format = format;
         this.functioncode = functioncode;
         this.opcode = opcode;
-        this.register1 = "";
-        this.register2 = "";
-        this.register3 = "";
-        this.immediate = "";
-        this.shamt = "";
-        this.address = "";
+        this.registerS = null;
+        this.registerT = null;
+        this.registerD = null;
+        this.immediate = null;
+        this.shamt = null;
+    }
+
+    @Override
+    public String toString()
+    {
+        return "-----" + name + " Reg:" + registerS + "-----";
     }
     
 }
-
 //lab2 l = new lab2();
 //lab2.instructionObject i = l.new instructionObject("1", "1", "1", "1");
