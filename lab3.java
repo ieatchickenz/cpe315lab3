@@ -186,8 +186,8 @@ public class lab3 {
 
                 case "I":
                     
-                    temp.registerS = Integer.parseInt(registerTable.get(lineList.get(i).get(1)), 2);
-                    temp.registerT = Integer.parseInt(registerTable.get(lineList.get(i).get(2)), 2);
+                    temp.registerS = Integer.parseInt(registerTable.get(lineList.get(i).get(2)), 2);
+                    temp.registerT = Integer.parseInt(registerTable.get(lineList.get(i).get(1)), 2);
                     
                     if((lineList.get(i).get(3).matches("-?([0-9]+)?[0-9]+")) || (lineList.get(i).get(3).matches("-"))){
                         tempInt = Integer.parseInt(lineList.get(i).get(3));
