@@ -115,7 +115,6 @@ public class lab3 {
                     continue;
                 }
                 else{
-                    int size = line.length() -1;
                     //System.out.print("line: ");
                     //System.out.println(line);
                     String[] noComment = line.split("#");
@@ -192,17 +191,12 @@ public class lab3 {
                     
                     if((lineList.get(i).get(3).matches("-?([0-9]+)?[0-9]+")) || (lineList.get(i).get(3).matches("-"))){
                         tempInt = Integer.parseInt(lineList.get(i).get(3));
-                        System.out.println(lineList.get(i).get(3));
-                        System.out.println("yes");
+                        //System.out.println(lineList.get(i).get(3));
                     }
                     else{
                         tempInt = labels.get(lineList.get(i).get(3))-address-1; 
-                        System.out.println("no");
-
                     }
                     temp.immediate = tempInt;
-
-                    
                     break;
 
                 case "IS":
@@ -244,7 +238,6 @@ public class lab3 {
                }
                program.add(temp);
             }
-            System.out.println(program.toString());
 
 
         //first loop is for labels:
@@ -272,13 +265,14 @@ public class lab3 {
         //This is after the formatting has been done for the .asm
         Scanner in = new Scanner(System.in);
         String command;
+        String[] commandArg;
 
         if(args.length<2 && args.length!=0){
             //Do prompt
             while(true){ 
                 System.out.print("mips> ");
                 command = in.nextLine();
-                String[] commandArg = command.split(" ");
+                commandArg = command.split(" ");
                 //System.out.println(Arrays.toString(commandArg));
                 switch(commandArg[0]){
                     case "q":
@@ -318,14 +312,16 @@ public class lab3 {
                     			step(program.get(pc));
                         	pc += 1;
                     		}
-                        System.out.println(tempint + " instruction(s) executed");
+                        System.out.println("\t" + tempint + " instruction(s) executed");
+                        System.out.println();
                         break;
 
                     case "r":
-                    		while(pc < program.size()) {
-                    			step(program.get(pc));
-                        	pc += 1;
-                    		}
+                        while(pc < program.size()) {
+                            step(program.get(pc));
+                            pc += 1;
+                        }
+                        System.out.println();
                         break;
 
                     case "m":
@@ -357,14 +353,91 @@ public class lab3 {
         }
         else if(args.length == 2){
             //script read start here
-            List<List<String>> scriptList = new ArrayList<List<String>>();
-
             File scriptFile = new File(args[1]);
 
             try(Stream<String> commands = Files.lines(scriptFile.toPath())){
                 List<String> commandList = commands.map(String::trim)
                                         .filter(line -> line.length() > 0)
                                         .collect(Collectors.toList());
+                String[] oneCommand;
+                for(int y = 0; y<commandList.size(); y++){
+                    System.out.println("mips> " + commandList.get(y));
+                    oneCommand = commandList.get(y).split(" ");
+                    switch(oneCommand[0]){
+                        case "q":
+                            in.close();
+                            return;
+                        case "quit":
+                            in.close();
+                            return;
+    
+                        case "h":
+                            help();
+                            System.out.println();
+                            break;
+                        case "help":
+                            help();
+                            System.out.println();
+                            break;
+    
+                        case "d":
+                            regDump(regList, pc);
+                            System.out.println();
+                            break;
+    
+                        case "s":
+                                //determine fate of invalid PC address
+                                int tempint = 1;
+                                if(oneCommand.length < 2)
+                                {
+                                    tempint = 1;
+                                }
+                                else
+                                {
+                                    tempint = Integer.parseInt(oneCommand[1]);
+                                }
+                                for(int z = 0; z < tempint; z++)
+                                {
+                                    step(program.get(pc));
+                                pc += 1;
+                                }
+                            System.out.println("\t" + tempint + " instruction(s) executed");
+                            System.out.println();
+                            break;
+    
+                        case "r":
+                            while(pc < program.size()) {
+                                step(program.get(pc));
+                                pc += 1;
+                            }
+                            System.out.println();
+                            break;
+    
+                        case "m":
+                            if(oneCommand.length > 3 || oneCommand.length < 3){
+                                System.out.println("Incorrect Formatting: type 'h' for help");
+                            }
+                            else{
+                                memDisp(dataMem, Integer.parseInt(oneCommand[1]), Integer.parseInt(oneCommand[2]));
+                            }
+                            System.out.println();
+                            break;
+    
+                        case "c":
+                            Arrays.fill(regList, 0);
+                            Arrays.fill(dataMem, 0);
+                            pc = 0;
+                            System.out.println("\tSimulator reset");
+                            System.out.println();
+                            break;
+    
+                        default:
+                            System.out.println("Invalid command.");
+                            System.out.println();
+                            break;
+                    }
+                }
+                
             }
             catch(IOException exs){
 
@@ -406,17 +479,13 @@ public class lab3 {
     	//return a string to be printed in 's' case
     	//ignore if we run
     	//and, or, add, addi, sll, sub, slt, beq, bne, lw, sw, j, jr, and jal
-    	System.out.println("here");
     	//return;
     	switch(instruction.name){
                     case "add":
                         regList[instruction.registerD] = regList[instruction.registerS] + regList[instruction.registerT];
                         return;
 
-                    case "addi":
-                    		System.out.println(regList[instruction.registerT]);
-                    		System.out.println(regList[instruction.registerS]);
-                    		System.out.println(instruction.immediate);
+                    case "addi":	
                         regList[instruction.registerT] = regList[instruction.registerS] + instruction.immediate;
                     		return;
 
