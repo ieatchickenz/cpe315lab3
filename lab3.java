@@ -307,7 +307,7 @@ public class lab3 {
                     		{
                     			tempint = Integer.parseInt(commandArg[1]);
                     		}
-                    		for(int z = 0; z < tempint; z++)
+                    		for(int z = 0; z < tempint && z < program.size(); z++)
                     		{
                     			step(program.get(pc));
                         	pc += 1;
@@ -396,10 +396,10 @@ public class lab3 {
                                 {
                                     tempint = Integer.parseInt(oneCommand[1]);
                                 }
-                                for(int z = 0; z < tempint; z++)
+                                for(int z = 0; z < tempint && z < program.size(); z++)
                                 {
                                     step(program.get(pc));
-                                pc += 1;
+                                    pc += 1;
                                 }
                             System.out.println("\t" + tempint + " instruction(s) executed");
                             System.out.println();
@@ -465,13 +465,13 @@ public class lab3 {
     public static void regDump(int[] regList, int progCount){
         System.out.println();
         System.out.println("pc = " + progCount);
-        System.out.println("$0 = " + regList[0] + "\t\t$v0 = " + regList[2] + "\t\t$v1 = " + regList[3] + "\t\t$a0 = " + regList[4]);
-        System.out.println("$a1 = " + regList[5] + "\t\t$a2 = " + regList[6] + "\t\t$a3 = " + regList[7] + "\t\t$t0 = " + regList[8]);
-        System.out.println("$t1 = " + regList[9] + "\t\t$t2 = " + regList[10] + "\t\t$t3 = " + regList[11] + "\t\t$t4 = " + regList[12]);
-        System.out.println("$t5 = " + regList[13] + "\t\t$t6 = " + regList[14] + "\t\t$t7 = " + regList[15] + "\t\t$s0 = " + regList[16]);
-        System.out.println("$s1 = " + regList[17] + "\t\t$s2 = " + regList[18] + "\t\t$s3 = " + regList[19] + "\t\t$s4 = " + regList[20]);
-        System.out.println("$s5 = " + regList[21] + "\t\t$s6 = " + regList[22] + "\t\t$s7 = " + regList[23] + "\t\t$t8 = " + regList[24]);
-        System.out.println("$t9 = " + regList[25] + "\t\t$sp = " + regList[30] + "\t\t$ra = " + regList[31]);
+        System.out.println("$0 = " + regList[0] + "          $v0 = " + regList[2] + "          $v1 = " + regList[3] + "          $a0 = " + regList[4]);
+        System.out.println("$a1 = " + regList[5] + "         $a2 = " + regList[6] + "          $a3 = " + regList[7] + "          $t0 = " + regList[8]);
+        System.out.println("$t1 = " + regList[9] + "         $t2 = " + regList[10] + "          $t3 = " + regList[11] + "          $t4 = " + regList[12]);
+        System.out.println("$t5 = " + regList[13] + "         $t6 = " + regList[14] + "          $t7 = " + regList[15] + "          $s0 = " + regList[16]);
+        System.out.println("$s1 = " + regList[17] + "         $s2 = " + regList[18] + "          $s3 = " + regList[19] + "          $s4 = " + regList[20]);
+        System.out.println("$s5 = " + regList[21] + "         $s6 = " + regList[22] + "          $s7 = " + regList[23] + "          $t8 = " + regList[24]);
+        System.out.println("$t9 = " + regList[25] + "         $sp = " + regList[29] + "          $ra = " + regList[31]);
     }
 
     public static void step(instructionObject instruction){
@@ -487,6 +487,7 @@ public class lab3 {
 
                     case "addi":	
                         regList[instruction.registerT] = regList[instruction.registerS] + instruction.immediate;
+                        //System.out.println("ADDI:" + "T: " + instruction.registerT + " S: " + instruction.registerS + " immed: " + instruction.immediate);
                     		return;
 
                     	case "and":
@@ -518,7 +519,7 @@ public class lab3 {
                     		return;
 
                     	case "lw":
-                        regList[instruction.registerT] = dataMem[instruction.registerS + instruction.immediate];
+                        regList[instruction.registerT] = dataMem[regList[instruction.registerS] + instruction.immediate];
                     		return;
 
                     	case "sw":
@@ -526,16 +527,16 @@ public class lab3 {
                     		return;
 
                     	case "j":
-                    		pc = instruction.immediate;
+                            pc = instruction.immediate - 1;
                     		return;
 
                     	case "jr":
-                    		pc = instruction.registerS;
+                    		pc = regList[instruction.registerS] - 1;
                     		return;
 
                     	case "jal":
                     		regList[31] = pc + 1;
-                    		pc = instruction.immediate;
+                    		pc = instruction.immediate - 1;
                     		return;
 
                     	default:
@@ -549,7 +550,10 @@ public class lab3 {
     }
 
     public static void memDisp(int[] dataMem, int start, int end){
-        System.out.println(Arrays.toString(Arrays.copyOfRange(dataMem, start, end+1)));
+        int newEnd = end +1;
+        for(int x = start; x < newEnd; x++){
+            System.out.println("[" + x + "] = " + dataMem[x]);
+        }
     }
 
 }
